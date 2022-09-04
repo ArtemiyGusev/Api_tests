@@ -1,6 +1,6 @@
-import requests
 from voluptuous import Schema, ALLOW_EXTRA
 from pytest_voluptuous import S
+from regression.utils.sessions import reqres
 
 
 def test_get_users_page():
@@ -14,7 +14,7 @@ def test_get_users_page():
     },
         extra=ALLOW_EXTRA,
     )
-    response = requests.get("https://reqres.in/api/users?page=2")
+    response = reqres().get("api/users?page=2")
     assert response.status_code == 200
     assert S(schema) == response.json()
     assert response.json()['page'] == 2
@@ -31,7 +31,7 @@ def test_post_create_users():
         "id": str,
         "createdAt": str
     })
-    response = requests.post("https://reqres.in/api/users", params=body)
+    response = reqres().post("api/users", params=body)
     assert response.status_code == 201
     assert S(schema) == response.json()
 
@@ -41,12 +41,12 @@ def test_register_user():
         "email": "eve.holt@reqres.in",
         "password": "citysl3icka"
     }
-    response_reg = requests.post("https://reqres.in/api/register", data=body)
+    response_reg = reqres().post("api/register", data=body)
     assert response_reg.status_code == 200
-    response_login = requests.post("https://reqres.in/api/register", data=body)
-    assert response_login.json() == response_reg.json()
+    response_login = reqres().post("api/login", data=body)
+    assert response_login.json()['token'] == response_reg.json()['token']
 
 
 def test_delete_user():
-    response = requests.delete("https://reqres.in/api/users/7")
+    response = reqres().delete("api/users/7")
     assert response.status_code == 204
